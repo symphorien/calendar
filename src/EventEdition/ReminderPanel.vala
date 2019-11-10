@@ -220,7 +220,14 @@ public class Maya.View.EventEdition.ReminderGrid : Gtk.ListBoxRow {
 
     public void set_duration (ICal.Duration duration) {
         is_human_change = false;
-        if (duration.get_weeks () > 0) {
+#if E_CAL_2_0
+        if (!duration.is_neg()) {
+#else
+        if (!(bool)duration.is_neg) {
+#endif
+            // trigger after start of event
+            time.active = 0;
+        } else if (duration.get_weeks () > 0) {
             time.active = 15;
         } else if (duration.get_days () > 1) {
             time.active = 14;
@@ -261,8 +268,10 @@ public class Maya.View.EventEdition.ReminderGrid : Gtk.ListBoxRow {
     public ICal.Duration get_duration () {
 #if E_CAL_2_0
         var duration = new ICal.Duration.null_duration ();
+        duration.set_is_neg (true);
 #else
         var duration = ICal.Duration.null_duration ();
+        duration.is_neg = 1;
 #endif
         switch (time.active) {
             case 1:
